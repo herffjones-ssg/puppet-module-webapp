@@ -1,0 +1,24 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+<VirtualHost <%= scope.lookupvar(@listen_ip_fact) %>:80>
+  ServerName <%= @servername %>
+  ServerAlias <%= @server_default_alias %><% if @serveraliases %><% @serveraliases.each do |serveralias| %> <%= serveralias %><% end -%><% end -%>
+
+  ServerAdmin <%= @serveradmin %>
+
+  DocumentRoot <%= @real_deploy_dir %><% if @sub_path %>/<%= @sub_path %><% end %>
+  <Directory "<%= @real_deploy_dir %>">
+            Options -Indexes FollowSymLinks MultiViews
+            AllowOverride None
+            Order allow,deny
+            Allow from all
+  </Directory>
+
+  <% if @extra_apache_config -%>
+      <%= extra_apache_config.gsub(/HTTPD-PERCENT-WORKAROUND/, '%') %>
+  <% end %>
+
+  ErrorLog <%= scope.lookupvar('webapp::apache_log_path') %>/<%= @instancename %>_error.log
+  CustomLog <%= scope.lookupvar('webapp::apache_log_path') %>/<%= @instancename %>_access.log combined
+</VirtualHost>
